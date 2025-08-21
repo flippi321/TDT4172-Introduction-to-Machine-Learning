@@ -4,7 +4,6 @@ import numpy as np
 class LinearRegression():
 
     def __init__(self, lr=1e-4):
-        # NOTE: Feel free to add any hyperparameters
         # (with defaults) as you see fit
         self.lr = lr
         self.m = 0
