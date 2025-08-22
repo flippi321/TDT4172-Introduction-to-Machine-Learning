@@ -6,8 +6,8 @@ class LogRegression():
     def __init__(self, X, lr=1e-4):
         # (with defaults) as you see fit
         self.lr = lr
-        self.m = np.zeros(X.shape[1])
-        self.b = 0
+        self.m = np.random.randn(X.shape[1]) * 0.01
+        self.b = np.random.randint(0, 10) * 0.01
         pass
 
     def fit(self, X, y, epoch=1000):
