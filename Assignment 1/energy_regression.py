@@ -25,14 +25,7 @@ class EnsembleRegressor():
         """ Root Mean Squared Error """
         return np.sqrt(mean_squared_error(y_true, y_pred))
 
-    def fit(self,
-            X,
-            y,
-            lr=1e-2,
-            min_lr=1e-4,
-            epoch=1000,
-            verbose=False,
-            plot_loss=False):
+    def fit(self, X, y, lr=1e-1, min_lr=1e-4, epoch=1000, verbose=False, plot_loss=False):
         """
         Estimates parameters for the classifier
         
