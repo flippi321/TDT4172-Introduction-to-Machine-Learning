@@ -25,7 +25,14 @@ class EnsembleRegressor():
         """ Root Mean Squared Error """
         return np.sqrt(mean_squared_error(y_true, y_pred))
 
-    def fit(self, X, y, lr=1e-4, epoch=1000, verbose=False):
+    def fit(self,
+            X,
+            y,
+            lr=1e-2,
+            min_lr=1e-4,
+            epoch=1000,
+            verbose=False,
+            plot_loss=False):
         """
         Estimates parameters for the classifier
         
@@ -52,7 +59,6 @@ class EnsembleRegressor():
             dm = -(2 / n) * np.dot(X.T, error)
             db = -(2 / n) * np.sum(error)
 
-
             # Update parameters
             self.m -= lr * dm
             self.b -= lr * db
@@ -62,7 +68,20 @@ class EnsembleRegressor():
                 plot_y.append(self.rmse(y, y_pred))
 
             if verbose and (i % max(1, (epoch // 10)) == 0):
-                print(f"Epoch {i}: MSE={self.rmse(y, y_pred):.4f}")
+                if verbose:
+                    print(
+                        f"Epoch {i} (lr {lr:.4f}): MSE={self.rmse(y, y_pred):.4f}"
+                    )
+
+            lr -= lr_step
+
+        if plot_loss:
+            plt.plot(plot_x, plot_y, label=f"RMSE")
+            plt.xlabel("Epoch")
+            plt.ylabel("RMSE")
+            plt.title("Loss during development")
+            plt.legend()
+            plt.show()
 
     def predict(self, X):
         """
@@ -78,11 +97,12 @@ class EnsembleRegressor():
             A length m array of floats
         """
         X = self.polynomial_preprocessing(X) if self.use_poly else np.array(X)
-        return np.dot(X, self.m) + self.b
+        return np.maximum(np.dot(X, self.m) + self.b, 0)
 
     def measure_accuracy(self, test_X, test_y, tresh=0.5, plot_roc=False):
         # Predicted probabilities
-        test_X =  self.polynomial_preprocessing(test_X) if self.use_poly else np.array(test_X)
+        test_X = self.polynomial_preprocessing(
+            test_X) if self.use_poly else np.array(test_X)
         pred_probs = self.predict(test_X)
         # Binary predictions at a custom treshold
         pred_labels = (pred_probs >= tresh).astype(int)
