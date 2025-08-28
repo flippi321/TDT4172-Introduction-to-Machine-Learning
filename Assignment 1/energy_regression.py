@@ -34,6 +34,9 @@ class EnsembleRegressor():
                 m rows (#samples) and n columns (#features)
             y (array<m>): a vector of floats
         """
+        plot_x = []
+        plot_y = []
+        lr_step = lr - min_lr / epoch
         X = self.polynomial_preprocessing(X) if self.use_poly else np.array(X)
         y = np.array(y)
         n = len(y)
@@ -53,6 +56,10 @@ class EnsembleRegressor():
             # Update parameters
             self.m -= lr * dm
             self.b -= lr * db
+
+            if (i % max(1, (epoch // 100)) == 0) and plot_loss:
+                plot_x.append(i)
+                plot_y.append(self.rmse(y, y_pred))
 
             if verbose and (i % max(1, (epoch // 10)) == 0):
                 print(f"Epoch {i}: MSE={self.rmse(y, y_pred):.4f}")
