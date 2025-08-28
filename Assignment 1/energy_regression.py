@@ -43,12 +43,12 @@ class EnsembleRegressor():
         """
         plot_x = []
         plot_y = []
-        lr_step = lr - min_lr / epoch
+        lr_step = (lr - min_lr) / epoch
         X = self.polynomial_preprocessing(X) if self.use_poly else np.array(X)
         y = np.array(y)
         n = len(y)
 
-        self.m = np.random.randn(X.shape[1]) * 0.001
+        self.m = np.random.randn(X.shape[1]) * 0.1
 
         for i in range(epoch):
             y_pred = self.predict(X)
@@ -68,10 +68,7 @@ class EnsembleRegressor():
                 plot_y.append(self.rmse(y, y_pred))
 
             if verbose and (i % max(1, (epoch // 10)) == 0):
-                if verbose:
-                    print(
-                        f"Epoch {i} (lr {lr:.4f}): MSE={self.rmse(y, y_pred):.4f}"
-                    )
+                print(f"Epoch {i} (lr {lr:.4f}): MSE={self.rmse(y, y_pred):.4f}")
 
             lr -= lr_step
 
@@ -97,7 +94,7 @@ class EnsembleRegressor():
             A length m array of floats
         """
         X = self.polynomial_preprocessing(X) if self.use_poly else np.array(X)
-        return np.maximum(np.dot(X, self.m) + self.b, 0)
+        return np.dot(X, self.m) + self.b
 
     def measure_accuracy(self, test_X, test_y, tresh=0.5, plot_roc=False):
         # Predicted probabilities
