@@ -34,21 +34,18 @@ class EnsembleRegressor():
         for i in range(epoch):
             y_pred = self.predict(X)
 
-            print(y)
-            print(y_pred)
-
             error = y - y_pred
 
             # Compute gradients
-            dm = -(2 / n) * np.sum(X * (y - y_pred))
-            db = -(2 / n) * np.sum(y - y_pred)
+            dm = -(2 / n) * np.dot(X.T, (y_pred - y))
+            db = -(2 / n) * np.sum(y_pred - y)
 
             # Update parameters
             self.m -= lr * dm
             self.b -= lr * db
 
             if verbose and (i % max(1, (epoch//10)) == 0):
-                print(f"Epoch {i}: Error={error:.4f}")
+                print(f"Epoch {i}: Error={np.mean(error):.4f}")
 
 
     def predict(self, X):
@@ -65,7 +62,8 @@ class EnsembleRegressor():
             A length m array of floats
         """
         #raise NotImplementedError("The predict method is not implemented yet.")
-        return X * self.m + self.b
+        #X = np.array(X)
+        return np.dot(X, self.m) + self.b
 
     def get_formula(self, dec=3):
         """
