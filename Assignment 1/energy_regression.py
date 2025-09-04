@@ -15,6 +15,9 @@ class EnsembleRegressor():
 
     def rmse(self, y_true, y_pred):
         return np.sqrt(np.mean((y_true - y_pred)**2))
+    
+    def rmsle(self, y_true, y_pred):
+        return np.sqrt(np.mean((np.log1p(y_true) - np.log1p(y_pred))**2))
 
     def fit(self, X, y, lr=1e-2, epoch=1000, verbose=False, plot_loss=False):
         """
