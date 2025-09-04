@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
-from sklearn.preprocessing import PolynomialFeatures
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_squared_log_error
 
@@ -40,15 +39,15 @@ class EnsembleRegressor():
             error = y - y_pred
 
             # Compute gradients
-            dm = -(2 / n) * np.dot(X.T, (y_pred - y))
-            db = -(2 / n) * np.sum(y_pred - y)
+            dm = -(2 / n) * np.dot(X.T, (y - y_pred))
+            db = -(2 / n) * np.sum(y - y_pred)
 
             # Update parameters
             self.m -= lr * dm
             self.b -= lr * db
 
             if verbose and (i % max(1, (epoch//10)) == 0):
-                print(f"Epoch {i}: Error={np.mean(error):.4f}")
+                print(f"Epoch {i}: Error={abs(np.mean(error)):.4f}")
 
 
     def predict(self, X):
