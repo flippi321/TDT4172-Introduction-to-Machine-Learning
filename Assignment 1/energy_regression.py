@@ -36,7 +36,7 @@ class EnsembleRegressor():
         for i in range(epoch):
             y_pred = self.predict(X)
 
-            error = y - y_pred
+            error = self.rmse(y, y_pred)
 
             # Compute gradients
             dm = -(2 / n) * np.dot(X.T, (y - y_pred))
@@ -47,7 +47,7 @@ class EnsembleRegressor():
             self.b -= lr * db
 
             if verbose and (i % max(1, (epoch//10)) == 0):
-                print(f"Epoch {i}: Error={abs(np.mean(error)):.4f}")
+                print(f"Epoch {i}: RMSLE={error:.4f}")
 
 
     def predict(self, X):
