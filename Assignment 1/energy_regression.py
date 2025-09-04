@@ -21,6 +21,8 @@ class EnsembleRegressor():
         return self.poly.fit_transform(np.array(X))
 
     def rmsle(self, y_true, y_pred):
+        y_true = np.maximum(y_true, 0)
+        y_pred = np.maximum(y_pred, 0)
         return np.sqrt(np.mean((np.log1p(y_true) - np.log1p(y_pred))**2))
 
     def fit(self, X, y, lr=1e-2, epoch=1000, verbose=False, plot_loss=False):
