@@ -13,7 +13,13 @@ class FeatureSelector():
         y_pred = np.maximum(y_pred, 0)
         return np.sqrt(np.mean((np.log1p(y_true) - np.log1p(y_pred))**2))
 
-    def select_features(self, x_train, x_test, y_train, y_test, save_every = 10000, start_err = float("inf"), checkpoint_file = "xgb_feature_combos.csv"):
+    def select_features(
+        self, 
+        x_train, x_test, y_train, y_test, 
+        save_every=10000, 
+        start_err=float("inf"), 
+        checkpoint_file="xgb_feature_combos.csv"
+    ):
         # Convert data once
         X_train_np = x_train.to_numpy()
         X_test_np  = x_test.to_numpy()
@@ -30,11 +36,16 @@ class FeatureSelector():
             df.to_csv(checkpoint_file, index=False)
 
         # Parameters
-        params = {"objective": "reg:squarederror", "verbosity": 0}
-        
         iteration_count = 0
         lowest_err = start_err
         best_combo = None
+
+        # Load best from previous runs if available
+        if (df["error"] != np.inf).any():
+            best_idx = df["error"].idxmin()
+            lowest_err = df.loc[best_idx, "error"]
+            best_combo = df.loc[best_idx, feature_names].to_numpy().astype(bool)
+            print(f"Resuming: best error so far = {lowest_err}")
 
         # Filter combos that still need evaluation
         to_evaluate = df[df["error"] == np.inf]
@@ -51,7 +62,7 @@ class FeatureSelector():
             dtrain = xgb.DMatrix(X_train_np[:, mask], label=y_train)
             dtest  = xgb.DMatrix(X_test_np[:, mask], label=y_test)
 
-            booster = xgb.train(params, dtrain, num_boost_round=100)
+            booster = xgb.train({"objective": "reg:squarederror", "verbosity": 0}, dtrain, num_boost_round=100)
             y_pred = booster.predict(dtest)
             
             error = self.rmsle(y_test, y_pred)
@@ -72,6 +83,9 @@ class FeatureSelector():
 
         # Save final
         df.to_csv(checkpoint_file, index=False)
+
+        if best_combo is None:
+            raise RuntimeError("No valid feature combination was found or evaluated.")
 
         # Convert best mask to column names
         best_features = [f for f, m in zip(feature_names, best_combo) if m]
