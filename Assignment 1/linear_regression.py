@@ -3,17 +3,17 @@ import numpy as np
 
 class LinearRegression():
 
-    def __init__(self, lr=1e-4):
+    def __init__(self, ):
         # (with defaults) as you see fit
-        self.lr = lr
         self.m = 0
         self.b = 0
+        self.loss = []
         pass
 
     def rmse(self, y_true, y_pred):
         return np.sqrt(np.mean((y_true - y_pred)**2))
 
-    def fit(self, X, y, epoch=1000):
+    def fit(self, X, y, lr=1e-4, epoch=1000, log_loss=False):
         """
         Estimates parameters for the classifier
         
@@ -28,14 +28,18 @@ class LinearRegression():
 
         for _ in range(epoch):
             y_pred = self.predict(X)
+            error = y - y_pred
 
             # Compute gradients
-            dm = -(2 / n) * np.sum(X * (y - y_pred))
-            db = -(2 / n) * np.sum(y - y_pred)
+            dm = -(2 / n) * np.sum(X * error)
+            db = -(2 / n) * np.sum(error)
 
             # Update parameters
-            self.m -= self.lr * dm
-            self.b -= self.lr * db
+            self.m -= lr * dm
+            self.b -= lr * db
+
+            if(log_loss):
+                self.loss.append(np.sum(error))
 
     def predict(self, X):
         """
@@ -59,9 +63,3 @@ class LinearRegression():
         as a string in the form "y = mx + b"
         """
         return f"y = {round(self.m, dec)}x + {round(self.b, dec)}"
-    
-    def get_error_distribution(self, X, y):
-        X = np.array(X)
-        y = np.array(y)
-        y_pred = self.predict(X)
-        return np.abs(y - y_pred)

@@ -7,11 +7,13 @@ from sklearn.preprocessing import PolynomialFeatures
 
 class EnsembleRegressor():
 
-    def __init__(self, degrees=0):
+    def __init__(self, degrees=0, threshold=0):
         # (with defaults) as you see fit
         self.poly = PolynomialFeatures(degree=degrees)
-        self.m = None
-        self.b = 0
+        self.threshold = threshold
+
+        self.m_small, self.b_small = None, 0
+        self.m_big, self.b_big = None, 0
         pass
 
     def rmse(self, y_true, y_pred):
@@ -36,12 +38,19 @@ class EnsembleRegressor():
         """
         X = self.polynomial_preprocessing(X)
         y = np.array(y)
-        n = len(y)
+        mask_small = y <= self.threshold
+        mask_big = y > self.threshold
 
-        self.m = np.random.randn(X.shape[1]) * 0.01
+        self.m_small, self.b_small = self.train_section(epoch, X, y[mask_small], lr, verbose)
+        self.m_big, self.b_big = self.train_section(epoch, X, y[mask_big], lr, verbose)
+        
+    def train_section(self, epoch, X, y, lr, verbose):
+        n = len(y)
+        m = np.random.randn(X.shape[1]) * 0.01
+        b = 0
 
         for i in range(epoch):
-            y_pred = self.predict(X)
+            y_pred = np.dot(X, m) + b
 
             error = self.rmsle(y, y_pred)
 
@@ -50,11 +59,13 @@ class EnsembleRegressor():
             db = -(2 / n) * np.sum(y - y_pred)
 
             # Update parameters
-            self.m -= lr * dm
-            self.b -= lr * db
+            m -= lr * dm
+            b -= lr * db
 
             if verbose and (i % max(1, (epoch // 10)) == 0):
                 print(f"Epoch {i}: RMSLE={error:.4f}")
+        
+        return m, b
 
     def predict(self, X, transform=False):
         """
@@ -69,17 +80,10 @@ class EnsembleRegressor():
         Returns:
             A length m array of floats
         """
-        #raise NotImplementedError("The predict method is not implemented yet.")
         if transform:
             X = self.polynomial_preprocessing(X)
+        
         return np.dot(X, self.m) + self.b
-
-    def get_formula(self, dec=3):
-        """
-        Returns the formula of the linear regression model
-        as a string in the form "y = mx + b"
-        """
-        return f"y = {round(self.m, dec)}x + {round(self.b, dec)}"
 
     def get_error_distribution(self, X, y):
         X = np.array(X)
