@@ -3,3 +3,4 @@ pandas
 matplotlib
 matplotlib_inline
 tensorflow
+scikit-learn
