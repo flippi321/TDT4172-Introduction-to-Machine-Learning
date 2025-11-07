@@ -1,4 +1,6 @@
 venv
+/data
 __pycache__
 temp_notes
-Assignment_2/data
+Assignment 2/data/
+Assignment 2/data
